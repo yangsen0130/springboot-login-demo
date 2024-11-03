@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.UserLoginDTO;
+import com.example.demo.dto.UserRegisterDTO;
 import com.example.demo.model.Result;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
@@ -16,9 +18,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public Result<User> register(@RequestParam String username, @RequestParam String password) {
+    public Result<User> register(@RequestBody UserRegisterDTO registerDTO) {
         try {
-            User user = userService.register(username, password);
+            User user = userService.register(registerDTO);
             return Result.success(user);
         } catch (Exception e) {
             return Result.error(e.getMessage());
@@ -26,11 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Result<User> login(@RequestParam String username,
-                              @RequestParam String password,
-                              HttpSession session) {
+    public Result<User> login(@RequestBody UserLoginDTO loginDTO, HttpSession session) {
         try {
-            User user = userService.login(username, password);
+            User user = userService.login(loginDTO);
             session.setAttribute("user", user);
             return Result.success(user);
         } catch (Exception e) {

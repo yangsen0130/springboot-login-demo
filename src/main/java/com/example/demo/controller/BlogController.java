@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.BlogCreateDTO;
+import com.example.demo.dto.BlogUpdateDTO;
 import com.example.demo.model.Blog;
 import com.example.demo.model.Result;
 import com.example.demo.model.User;
@@ -7,7 +9,6 @@ import com.example.demo.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -19,12 +20,10 @@ public class BlogController {
     private BlogService blogService;
 
     @PostMapping("/create")
-    public Result<Blog> createBlog(@RequestParam String title,
-                                   @RequestParam("file") MultipartFile markdownFile,
-                                   HttpSession session) {
+    public Result<Blog> createBlog(@RequestBody BlogCreateDTO blogDTO, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
-            Blog blog = blogService.createBlog(title, markdownFile, user.getId());
+            Blog blog = blogService.createBlog(blogDTO, user.getId());
             return Result.success(blog);
         } catch (Exception e) {
             return Result.error(e.getMessage());
@@ -33,12 +32,11 @@ public class BlogController {
 
     @PutMapping("/{blogId}")
     public Result<Blog> updateBlog(@PathVariable Long blogId,
-                                   @RequestParam String title,
-                                   @RequestParam("file") MultipartFile markdownFile,
+                                   @RequestBody BlogUpdateDTO blogDTO,
                                    HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
-            Blog blog = blogService.updateBlog(blogId, title, markdownFile, user.getId());
+            Blog blog = blogService.updateBlog(blogId, blogDTO, user.getId());
             return Result.success(blog);
         } catch (Exception e) {
             return Result.error(e.getMessage());

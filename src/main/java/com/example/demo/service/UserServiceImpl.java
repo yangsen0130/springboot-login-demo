@@ -1,6 +1,7 @@
-
 package com.example.demo.service;
 
+import com.example.demo.dto.UserLoginDTO;
+import com.example.demo.dto.UserRegisterDTO;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.util.MD5Util;
@@ -14,21 +15,21 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public User register(String username, String password) {
-        if (userRepository.findByUsername(username) != null) {
+    public User register(UserRegisterDTO registerDTO) {
+        if (userRepository.findByUsername(registerDTO.getUsername()) != null) {
             throw new RuntimeException("用户名已存在");
         }
 
         User user = new User();
-        user.setUsername(username);
-        user.setPassword(MD5Util.encrypt(password));
+        user.setUsername(registerDTO.getUsername());
+        user.setPassword(MD5Util.encrypt(registerDTO.getPassword()));
         return userRepository.save(user);
     }
 
     @Override
-    public User login(String username, String password) {
-        User user = userRepository.findByUsername(username);
-        if (user == null || !user.getPassword().equals(MD5Util.encrypt(password))) {
+    public User login(UserLoginDTO loginDTO) {
+        User user = userRepository.findByUsername(loginDTO.getUsername());
+        if (user == null || !user.getPassword().equals(MD5Util.encrypt(loginDTO.getPassword()))) {
             throw new RuntimeException("用户名或密码错误");
         }
         return user;
