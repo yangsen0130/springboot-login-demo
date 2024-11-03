@@ -1,60 +1,52 @@
 package com.example.demo.controller;
 
-
+import com.example.demo.model.Result;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public Result<User> register(@RequestParam String username, @RequestParam String password) {
         try {
-            User registeredUser = userService.register(user);
-            return ResponseEntity.ok(registeredUser);
+            User user = userService.register(username, password);
+            return Result.success(user);
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return Result.error(e.getMessage());
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user, HttpSession session) {
+    public Result<User> login(@RequestParam String username,
+                              @RequestParam String password,
+                              HttpSession session) {
         try {
-            User loggedInUser = userService.login(user.getUsername(), user.getPassword());
-            session.setAttribute("user", loggedInUser);
-            return ResponseEntity.ok(loggedInUser);
+            User user = userService.login(username, password);
+            session.setAttribute("user", user);
+            return Result.success(user);
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return Result.error(e.getMessage());
         }
     }
 
-    @GetMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok().build();
+    @PostMapping("/logout")
+    public Result<Void> logout(HttpSession session) {
+        session.removeAttribute("user");
+        return Result.success(null);
     }
 
-    @GetMapping("/checkLogin")
-    public ResponseEntity<?> checkLogin(HttpSession session) {
+    @GetMapping("/info")
+    public Result<User> getUserInfo(HttpSession session) {
         User user = (User) session.getAttribute("user");
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        }
-        return ResponseEntity.badRequest().body("未登录");
+        return Result.success(user);
     }
 }
